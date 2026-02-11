@@ -74,6 +74,8 @@ class OverlayService : Service() {
         private var highPerformanceResizeEnabled: Boolean = true
         @Volatile
         private var floatingBallColor: Int = Color.parseColor("#2F6FFF")
+        @Volatile
+        private var serviceRunning: Boolean = false
 
         fun start(context: Context) {
             ContextCompat.startForegroundService(
@@ -97,6 +99,7 @@ class OverlayService : Service() {
 
         fun setHighPerformanceMode(context: Context, enabled: Boolean) {
             highPerformanceResizeEnabled = enabled
+            if (!serviceRunning) return
             val intent = Intent(context, OverlayService::class.java).apply {
                 action = ACTION_SET_PERFORMANCE_MODE
                 putExtra(EXTRA_HIGH_PERFORMANCE, enabled)
@@ -106,6 +109,7 @@ class OverlayService : Service() {
 
         fun setBallColor(context: Context, color: Int) {
             floatingBallColor = color
+            if (!serviceRunning) return
             val intent = Intent(context, OverlayService::class.java).apply {
                 action = ACTION_SET_BALL_COLOR
                 putExtra(EXTRA_BALL_COLOR, color)
@@ -123,7 +127,7 @@ class OverlayService : Service() {
     private var captureParams: WindowManager.LayoutParams? = null
     private var historyView: View? = null
     private var historyParams: WindowManager.LayoutParams? = null
-    private val ballIdleAlpha = 0.55f
+    private val ballIdleAlpha = 0.8f
     private val ballActiveAlpha = 1f
     private var historyListContainer: LinearLayout? = null
     private val stickers = mutableListOf<StickerView>()
@@ -158,6 +162,7 @@ class OverlayService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        serviceRunning = true
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         startForegroundInternal()
         loadHistory()
@@ -193,6 +198,7 @@ class OverlayService : Service() {
     }
 
     override fun onDestroy() {
+        serviceRunning = false
         removeAllViews()
         releaseCaptureSession()
         MediaProjectionHolder.mediaProjection?.unregisterCallback(projectionCallback)

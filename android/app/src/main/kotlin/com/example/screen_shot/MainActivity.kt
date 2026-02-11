@@ -3,9 +3,11 @@ package com.example.screen_shot
 import android.content.Intent
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.FlutterShellArgs
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
@@ -50,6 +52,17 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    override fun getFlutterShellArgs(): FlutterShellArgs {
+        return FlutterShellArgs.fromIntent(intent).apply {
+            // Force-disable Impeller on devices with Vulkan compatibility issues.
+            remove(FlutterShellArgs.ARG_ENABLE_IMPELLER)
+            add(FlutterShellArgs.ARG_DISABLE_IMPELLER)
+            if (Build.MANUFACTURER.equals("vivo", ignoreCase = true)) {
+                add(FlutterShellArgs.ARG_ENABLE_SOFTWARE_RENDERING)
+            }
+        }
     }
 
     private fun handleOverlayPermission(result: MethodChannel.Result) {

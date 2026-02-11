@@ -54,8 +54,6 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (_autoTried) return;
       _autoTried = true;
-      await _applyHighPerformanceMode();
-      await _applyBallColor();
       await _startOverlay(auto: true);
     });
   }
